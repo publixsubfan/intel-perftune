@@ -63,6 +63,19 @@ bool PerfMailbox::setVoltageSettings(Domain d, VoltageSetting v) {
 	return ((uint8_t)(msr_out >> 32) == 0);
 }
 
+optional<SVIDSetting> PerfMailbox::getSVIDSetting() {
+    const uint8_t command = 0x12;
+    uint64_t msr_out = get(Domain::Core, command, 0).value_or(1ULL << 32);
+	if ((uint8_t)(msr_out >> 32) > 0) {
+		return {};
+	}
+    SVIDSetting sv = {
+        (bool)((msr_out >> 31) & 0x1), //disable_svid
+        (int)(msr_out & 0x7FF)
+    };
+    return sv;
+}
+
 optional<uint64_t> PerfMailbox::get(Domain d, uint32_t cmd, uint32_t data) {
 	uint64_t msr_in = (((0x1ULL << 31)
 	                  | ((int)d << 8)

@@ -27,6 +27,15 @@ struct TurboSettings {
 	uint8_t turbo_ratio[4];
 };
 
+struct SVIDSettting {
+    bool disable_svid;
+    int vcc_in;
+
+    bool isDynamic() {
+        return vcc_in == 0;
+    }
+}
+
 enum class Domain {
 	Core = 0,
 	Graphics = 1,
@@ -58,6 +67,7 @@ public:
 
 	bool setVoltageSettings(Domain d, VoltageSetting v);
 
+	optional<SVIDSetting> getSVIDSetting();
 private:
 	PerfMailbox(int fd)
 		: msr_fd(fd) { }
