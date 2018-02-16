@@ -27,14 +27,14 @@ struct TurboSettings {
 	uint8_t turbo_ratio[4];
 };
 
-struct SVIDSettting {
+struct SVIDSetting {
     bool disable_svid;
     int vcc_in;
 
     bool isDynamic() {
         return vcc_in == 0;
     }
-}
+};
 
 enum class Domain {
 	Core = 0,
