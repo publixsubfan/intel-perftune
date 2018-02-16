@@ -3,9 +3,10 @@
 
 using std::cout;
 using std::endl;
+using namespace perftune;
 
 int main(int argc, char** argv) {
-	optional<PerfMailbox> pctrl(PerfMailbox::initialize());
+	auto pctrl(PerfMailbox::initialize());
 	if (!pctrl) {
 		cerr << "Failed to open msr device." << endl
 			 << "Check if msr kernel module is loaded,"

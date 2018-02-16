@@ -1,8 +1,14 @@
 #pragma once
-#include <optional>
+#include <cstdint>
 #include <unistd.h>
+#include "result.hpp"
 
 using namespace std;
+
+namespace perftune
+{
+
+using util::Result;
 
 struct Capabilities {
 	uint8_t max_ratio;
@@ -28,12 +34,12 @@ struct TurboSettings {
 };
 
 struct SVIDSetting {
-    bool disable_svid;
-    int vcc_in;
+	bool disable_svid;
+	int vcc_in;
 
-    bool isDynamic() {
-        return vcc_in == 0;
-    }
+	bool isDynamic() {
+		return vcc_in == 0;
+	}
 };
 
 enum class Domain {
@@ -45,9 +51,14 @@ enum class Domain {
 	DigitalIO = 5
 };
 
+enum class Error {
+	None,
+	IoError,
+	MailboxError
+};
+
 class PerfMailbox {
 public:
-
 	PerfMailbox(PerfMailbox& copy)
 		: msr_fd(copy.msr_fd) { }
 
@@ -57,22 +68,24 @@ public:
 		}
 	}
 
-	static optional<PerfMailbox> initialize();
+	static Result<PerfMailbox, Error> initialize();
 
-	optional<Capabilities> getCapabilities(Domain d);
+	Result<Capabilities, Error> getCapabilities(Domain d);
 
-	optional<TurboSettings> getTurboRatios();
+	Result<TurboSettings, Error> getTurboRatios();
 
-	optional<VoltageSetting> getVoltageSettings(Domain d);
+	Result<VoltageSetting, Error> getVoltageSettings(Domain d);
 
-	bool setVoltageSettings(Domain d, VoltageSetting v);
+	Error setVoltageSettings(Domain d, VoltageSetting v);
 
-	optional<SVIDSetting> getSVIDSetting();
+	Result<SVIDSetting, Error> getSVIDSetting();
 private:
 	PerfMailbox(int fd)
 		: msr_fd(fd) { }
 
 	int msr_fd;
 
-	optional<uint64_t> get(Domain d, uint32_t cmd, uint32_t data);
+	Result<uint64_t, Error> get(Domain d, uint32_t cmd, uint32_t data);
 };
+
+}
