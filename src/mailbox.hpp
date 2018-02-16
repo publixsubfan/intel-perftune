@@ -60,13 +60,27 @@ enum class Error {
 class PerfMailbox {
 public:
 	PerfMailbox(PerfMailbox& copy)
-		: msr_fd(copy.msr_fd) { }
+		: msr_fd(copy.msr_fd) {
+		copy.msr_fd = -1;
+	}
+
+	PerfMailbox(PerfMailbox&& move) {
+	    this->msr_fd = move.msr_fd;
+	    move.msr_fd = -1;
+    }
 
 	~PerfMailbox() {
-		if (msr_fd >= 0) {
+		if (msr_fd != -1) {
 			close(msr_fd);
 		}
 	}
+
+	PerfMailbox& operator = (PerfMailbox&& move) {
+	    if (this->msr_fd != -1)
+	        close(msr_fd);
+	    this->msr_fd = move.msr_fd;
+	    move.msr_fd = -1;
+    }
 
 	static Result<PerfMailbox, Error> initialize();
 
