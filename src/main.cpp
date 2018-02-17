@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include "msr.hpp"
 #include "mailbox.hpp"
 
 using std::cout;
@@ -6,15 +8,18 @@ using std::endl;
 using namespace perftune;
 
 int main(int argc, char** argv) {
-	auto pctrl(PerfMailbox::initialize());
-	if (!pctrl) {
+	std::string msr_loc("/dev/cpu/0/msr");
+	auto msr_dev(Msr::initialize(msr_loc));
+	if (!msr_dev) {
 		cerr << "Failed to open msr device." << endl
 			 << "Check if msr kernel module is loaded, "
 			 << "and that you have permissions to read the device." << endl;
 		return 0;
 	}
 
-	if (auto capabilities = pctrl->getCapabilities(Domain::Core)) {
+	PerfMailbox pctrl(msr_dev.getResult());
+
+	if (auto capabilities = pctrl.getCapabilities(Domain::Core)) {
 		cout << "CPU capabilities:\n"
 			 << " - Maximum turbo ratio: " << (int)capabilities->max_ratio << endl
 			 << " - Unlocked turbo ratio: "
@@ -25,7 +30,7 @@ int main(int argc, char** argv) {
 			 << ((capabilities->support_offset_v) ? "Y" : "N") << endl;
 	}
 
-	if (auto capabilities = pctrl->getCapabilities(Domain::Graphics)) {
+	if (auto capabilities = pctrl.getCapabilities(Domain::Graphics)) {
 		cout << "GPU capabilities:\n"
 			 << " - Maximum clock ratio: " << (int)capabilities->max_ratio << endl
 			 << " - Unlocked clock ratio: "

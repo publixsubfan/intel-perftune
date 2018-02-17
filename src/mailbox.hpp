@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <unistd.h>
+#include "msr.hpp"
 #include "result.hpp"
 
 using namespace std;
@@ -59,30 +59,8 @@ enum class Error {
 
 class PerfMailbox {
 public:
-	PerfMailbox(PerfMailbox& copy)
-		: msr_fd(copy.msr_fd) {
-		copy.msr_fd = -1;
-	}
-
-	PerfMailbox(PerfMailbox&& move) {
-	    this->msr_fd = move.msr_fd;
-	    move.msr_fd = -1;
-    }
-
-	~PerfMailbox() {
-		if (msr_fd != -1) {
-			close(msr_fd);
-		}
-	}
-
-	PerfMailbox& operator = (PerfMailbox&& move) {
-	    if (this->msr_fd != -1)
-	        close(msr_fd);
-	    this->msr_fd = move.msr_fd;
-	    move.msr_fd = -1;
-    }
-
-	static Result<PerfMailbox, Error> initialize();
+	PerfMailbox(Msr msr)
+		: _msr(msr) { }
 
 	Result<Capabilities, Error> getCapabilities(Domain d);
 
@@ -94,10 +72,8 @@ public:
 
 	Result<SVIDSetting, Error> getSVIDSetting();
 private:
-	PerfMailbox(int fd)
-		: msr_fd(fd) { }
-
-	int msr_fd;
+	Msr _msr;
+	const int msr_offset = 0x150;
 
 	Result<uint64_t, Error> get(Domain d, uint32_t cmd, uint32_t data);
 };

@@ -6,14 +6,6 @@ namespace perftune
 
 using util::Result;
 
-Result<PerfMailbox, Error> PerfMailbox::initialize() {
-	int msr_fd = open("/dev/cpu/0/msr", O_RDWR);
-	if (msr_fd < 0)
-		return Error::IoError;
-	PerfMailbox p (msr_fd);
-	return p;
-}
-
 Result<Capabilities, Error> PerfMailbox::getCapabilities(Domain d) {
 	const uint8_t command = 0x1;
 	auto msr_out = get(d, command, 0);
@@ -107,9 +99,9 @@ Result<uint64_t, Error> PerfMailbox::get(Domain d, uint32_t cmd, uint32_t data) 
 	                  | cmd) << 32)
 	                  | data;
 	uint64_t msr_out;
-	if (pwrite(msr_fd, &msr_in, sizeof(uint64_t), 0x150) != sizeof(uint64_t))
+	if (_msr.write_msr(msr_offset, msr_in) != 0)
 		return Error::IoError;
-	if (pread(msr_fd, &msr_out, sizeof(uint64_t), 0x150) != sizeof(uint64_t))
+	if (_msr.read_msr(msr_offset, msr_out) != 0)
 		return Error::IoError;
 	return msr_out;
 }
