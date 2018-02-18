@@ -51,11 +51,6 @@ enum class Domain {
 	DigitalIO = 5
 };
 
-enum class Error {
-	None,
-	IoError,
-	MailboxError
-};
 
 class PerfMailbox {
 public:
