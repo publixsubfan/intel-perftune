@@ -5,8 +5,9 @@ namespace perftune
 {
 
 using util::Result;
+using util::Error;
 
-Result<Capabilities, Error> PerfMailbox::getCapabilities(Domain d) {
+Result<Capabilities> PerfMailbox::getCapabilities(Domain d) {
 	const uint8_t command = 0x1;
 	auto msr_out = get(d, command, 0);
 	if (!msr_out) {
@@ -24,7 +25,7 @@ Result<Capabilities, Error> PerfMailbox::getCapabilities(Domain d) {
     };
 }
 
-Result<TurboSettings, Error> PerfMailbox::getTurboRatios() {
+Result<TurboSettings> PerfMailbox::getTurboRatios() {
 	const uint8_t command = 0x2;
 	auto msr_out = get(Domain::Core, command, 0);
 	if (!msr_out) {
@@ -42,7 +43,7 @@ Result<TurboSettings, Error> PerfMailbox::getTurboRatios() {
 	return turbo_out;
 }
 
-Result<VoltageSetting, Error> PerfMailbox::getVoltageSettings(Domain d) {
+Result<VoltageSetting> PerfMailbox::getVoltageSettings(Domain d) {
 	const uint8_t command = 0x10;
 	auto msr_out = get(d, command, 0);
 	if (!msr_out) {
@@ -76,7 +77,7 @@ Error PerfMailbox::setVoltageSettings(Domain d, VoltageSetting v) {
 	return Error::None;
 }
 
-Result<SVIDSetting, Error> PerfMailbox::getSVIDSetting() {
+Result<SVIDSetting> PerfMailbox::getSVIDSetting() {
     const uint8_t command = 0x12;
     auto msr_out = get(Domain::Core, command, 0);
 	if (!msr_out) {
@@ -93,7 +94,7 @@ Result<SVIDSetting, Error> PerfMailbox::getSVIDSetting() {
     return sv;
 }
 
-Result<uint64_t, Error> PerfMailbox::get(Domain d, uint32_t cmd, uint32_t data) {
+Result<uint64_t> PerfMailbox::get(Domain d, uint32_t cmd, uint32_t data) {
 	uint64_t msr_in = (((0x1ULL << 31)
 	                  | ((int)d << 8)
 	                  | cmd) << 32)

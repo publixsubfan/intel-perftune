@@ -3,14 +3,13 @@
 
 namespace perftune::util
 {
+	enum class Error {
+		None,
+		IoError,
+		MailboxError
+	};
 
-enum class Error {
-	None,
-	IoError,
-	MailboxError
-};
-
-	template<typename T, typename E>
+	template<typename T, typename E = Error>
 	struct Result {
 	public:
 		Result(T expected)

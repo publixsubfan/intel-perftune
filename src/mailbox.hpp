@@ -9,6 +9,7 @@ namespace perftune
 {
 
 using util::Result;
+using util::Error;
 
 struct Capabilities {
 	uint8_t max_ratio;
@@ -26,6 +27,13 @@ struct VoltageSetting {
 		return (((fixed_v & 0xFFF) << 8)
 				|((use_fixed ? 0x1 : 0x0) << 20)
 				|(offset_v & 0x7FF) << 21);
+	}
+
+	void setOffsetV(int mv) {
+		offset_v = (mv * 1024) / 500;
+		if (offset_v % 2 == 1)
+			offset_v++;
+		offset_v /= 2;
 	}
 };
 
@@ -57,20 +65,20 @@ public:
 	PerfMailbox(Msr msr)
 		: _msr(msr) { }
 
-	Result<Capabilities, Error> getCapabilities(Domain d);
+	Result<Capabilities> getCapabilities(Domain d);
 
-	Result<TurboSettings, Error> getTurboRatios();
+	Result<TurboSettings> getTurboRatios();
 
-	Result<VoltageSetting, Error> getVoltageSettings(Domain d);
+	Result<VoltageSetting> getVoltageSettings(Domain d);
 
 	Error setVoltageSettings(Domain d, VoltageSetting v);
 
-	Result<SVIDSetting, Error> getSVIDSetting();
+	Result<SVIDSetting> getSVIDSetting();
 private:
 	Msr _msr;
 	const int msr_offset = 0x150;
 
-	Result<uint64_t, Error> get(Domain d, uint32_t cmd, uint32_t data);
+	Result<uint64_t> get(Domain d, uint32_t cmd, uint32_t data);
 };
 
 }
